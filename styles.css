@@ -1,0 +1,714 @@
+/* Habit & Mood Tracker */
+
+.hm-host {
+  --hm-ink: var(--background-primary);
+  --hm-face-off: #565d69;
+  --hm-face-on: #9aa3ad;
+  --hm-line: var(--background-modifier-border);
+  --hm-row-h: 48px;
+}
+
+.hm-root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+.hm-app .hm-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.hm-app .hm-inner {
+  min-height: 100%;
+}
+
+.hm-root {
+  position: relative;
+  padding-bottom: 8px;
+  font-size: 13px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ------------------------------- cards ------------------------------ */
+
+.hm-seg {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.hm-seg-btn {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.hm-seg-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+}
+
+.hm-seg-btn.is-on {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.hm-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hm-chart-card {
+  background: var(--background-secondary);
+  border: 1px solid var(--hm-line);
+  border-radius: 10px;
+  padding: 12px 14px 10px;
+}
+
+.hm-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hm-card-title {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hm-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.hm-badge.is-up {
+  background: rgba(34, 197, 94, 0.18);
+  color: #22c55e;
+}
+
+.hm-badge.is-down {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+}
+
+.hm-badge.is-flat {
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+}
+
+.hm-chart-body {
+  position: relative;
+}
+
+.hm-chart-body.is-empty {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hm-chart-axis {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+}
+
+.hm-axis-lab {
+  position: absolute;
+  right: 0;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text-faint);
+}
+
+.hm-chart-scroll {
+  margin-left: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+}
+
+.hm-chart-scroll::-webkit-scrollbar {
+  display: none;
+  height: 0;
+}
+
+.hm-chart-scroll.is-dragging {
+  cursor: grabbing;
+}
+
+.hm-chart-svg {
+  display: block;
+}
+
+.hm-empty {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.hm-mix {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 10px;
+  height: 130px;
+  padding-top: 6px;
+}
+
+.hm-mix-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex: 1 1 0;
+}
+
+.hm-mix-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  height: 14px;
+}
+
+.hm-mix-bar {
+  width: 100%;
+  max-width: 54px;
+  border-radius: 4px;
+  background: var(--background-modifier-border);
+}
+
+.hm-mix-bar.is-top {
+  background: var(--interactive-accent);
+}
+
+/* ------------------------------- grid ------------------------------- */
+
+.hm-scroll {
+  margin-top: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hm-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.hm-scroll.is-dragging {
+  cursor: grabbing;
+}
+
+.hm-inner {
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+}
+
+.hm-log .hm-cards {
+  padding-bottom: 4px;
+}
+
+.hm-gapline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--text-faint);
+  opacity: 0.55;
+}
+
+.hm-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--hm-col);
+  z-index: 2;
+  pointer-events: none;
+  background: var(--background-modifier-hover);
+  border-radius: 4px;
+}
+
+.hm-row {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  height: var(--hm-row-h);
+  border-bottom: 1px solid var(--hm-line);
+}
+
+.hm-row:last-child {
+  border-bottom: none;
+}
+
+.hm-label {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  flex: 0 0 var(--hm-label);
+  width: var(--hm-label);
+  display: flex;
+  align-items: center;
+  background: var(--background-primary);
+  padding-right: 8px;
+}
+
+.hm-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: context-menu;
+}
+
+.hm-track {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.hm-tail {
+  position: sticky;
+  right: 0;
+  z-index: 3;
+  flex: 0 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--background-primary);
+}
+
+/* header */
+
+.hm-head-row {
+  height: 46px;
+  border-bottom: 1px solid var(--hm-line);
+}
+
+.hm-weekbtn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-faint);
+  font-size: 15px;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  touch-action: manipulation;
+}
+
+.hm-tail .hm-weekbtn {
+  margin: 0 auto;
+}
+
+.hm-weekbtn:hover {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+}
+
+.hm-weekbtn.is-armed {
+  color: var(--text-on-accent);
+  background: var(--interactive-accent);
+}
+
+.hm-dcell {
+  cursor: pointer;
+  border-radius: 6px;
+  position: absolute;
+  top: 0;
+  width: var(--hm-col);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 10px;
+  color: var(--text-faint);
+  line-height: 1.15;
+}
+
+.hm-dcell-num {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.hm-dcell:hover {
+  background: var(--background-modifier-hover);
+}
+
+.hm-dcell.is-today .hm-dcell-top,
+.hm-dcell.is-today .hm-dcell-num {
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+/* blocks + cells */
+
+.hm-blocks,
+.hm-cells {
+  position: absolute;
+  inset: 0;
+}
+
+.hm-blocks {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hm-cells {
+  z-index: 2;
+}
+
+.hm-block {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hm-cell {
+  position: absolute;
+  top: 0;
+  width: var(--hm-col);
+  height: 100%;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.hm-cell:hover {
+  background: var(--background-modifier-hover);
+}
+
+.hm-cell.is-armed {
+  outline: 2px dashed var(--text-faint);
+  outline-offset: -5px;
+  border-radius: 6px;
+}
+
+/* mood row */
+
+.hm-mood-row {
+  height: 44px;
+  border-bottom: none;
+}
+
+.hm-mcell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hm-face {
+  display: inline-flex;
+  color: var(--hm-face-off);
+  line-height: 0;
+}
+
+.hm-face.has {
+  color: var(--hm-face-on);
+}
+
+.hm-face-svg {
+  display: block;
+}
+
+/* Obsidian's code-block edit affordance, hidden over the tracker */
+.cm-embed-block:has(.hm-host) .edit-block-button,
+.markdown-source-view .cm-embed-block:has(.hm-host)::before,
+.markdown-source-view .cm-embed-block:has(.hm-host)::after {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+.cm-embed-block:has(.hm-host) {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.hm-host .edit-block-button {
+  display: none !important;
+}
+
+/* controls: strip theme button styling, we draw our own */
+.hm-stop,
+.hm-pickface,
+.hm-seg-btn,
+.hm-weekbtn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+.hm-seg-btn.is-on {
+  background: var(--background-modifier-hover) !important;
+}
+
+.hm-weekbtn:hover {
+  background: var(--background-modifier-hover) !important;
+}
+
+.hm-weekbtn.is-armed {
+  background: var(--interactive-accent) !important;
+}
+
+.hm-weekbtn.is-off {
+  opacity: 0.3;
+}
+
+/* ------------------------------ panel ------------------------------- */
+
+.hm-panel {
+  --hm-ink: var(--background-primary);
+  --hm-face-off: #565d69;
+  --hm-face-on: #9aa3ad;
+  position: fixed;
+  z-index: 9999;
+  width: 300px;
+  background: var(--background-secondary);
+  border: 1px solid var(--hm-line);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  padding: 12px 14px 14px;
+}
+
+.hm-panel-sheet {
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  top: auto;
+  width: auto;
+}
+
+.hm-panel-head {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-normal);
+  text-transform: capitalize;
+  margin-bottom: 10px;
+}
+
+.hm-panel-label {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 12px 0 8px;
+}
+
+.hm-panel-head + .hm-panel-label {
+  margin-top: 0;
+}
+
+.hm-facepick {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.hm-pickface {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 2px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.hm-pickface.is-sel {
+  color: var(--interactive-accent);
+  --hm-ink: #fff;
+}
+
+.hm-scale {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.hm-scale-line {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  background: var(--background-modifier-border);
+}
+
+.hm-stop {
+  position: relative;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  flex: 1 1 0;
+}
+
+.hm-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--background-secondary);
+  border: 2px solid var(--background-modifier-border);
+  box-sizing: border-box;
+}
+
+.hm-stop.is-on .hm-dot {
+  background: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+}
+
+.hm-stop-lab {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.hm-stop.is-on .hm-stop-lab {
+  color: var(--text-normal);
+}
+
+.hm-input {
+  width: 100%;
+  font-size: 13px;
+}
+
+.hm-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.hm-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.hm-swatch.is-on {
+  border-color: var(--text-normal);
+}
+
+.hm-color {
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.hm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.hm-panel-note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  margin: 6px 0 10px;
+}
+
+.hm-btn {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.hm-btn.is-primary {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.hm-snippet {
+  background: var(--background-secondary);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* ------------------------------ mobile ------------------------------ */
+
+.is-mobile .hm-card {
+  min-width: 148px;
+}
+
+.is-mobile .hm-panel {
+  padding: 14px 16px 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-scroll {
+    scroll-behavior: auto;
+  }
+}

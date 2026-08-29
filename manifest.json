@@ -1,0 +1,9 @@
+{
+  "id": "habit-mood-tracker",
+  "name": "Habit & Mood Tracker",
+  "version": "1.0.0",
+  "minAppVersion": "1.4.0",
+  "description": "A minimal habit and mood tracker",
+  "author": "Talkso",
+  "isDesktopOnly": false
+}
