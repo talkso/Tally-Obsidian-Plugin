@@ -1808,20 +1808,25 @@ class HabitSettingTab extends PluginSettingTab {
           await this.plugin.saveState();
         })
       );
-      s.addExtraButton((b) =>
-        b
-          .setIcon('arrow-up')
-          .setTooltip('Move up')
-          .onClick(async () => {
-            if (i === 0) return;
-            const list = this.plugin.data.habits;
-            const tmp = list[i - 1];
-            list[i - 1] = list[i];
-            list[i] = tmp;
-            await this.plugin.saveState();
-            this.display();
-          })
-      );
+      const swap = async (from, to) => {
+        const list = this.plugin.data.habits;
+        if (to < 0 || to >= list.length) return;
+        const tmp = list[to];
+        list[to] = list[from];
+        list[from] = tmp;
+        await this.plugin.saveState();
+        this.display();
+      };
+
+      s.addExtraButton((b) => {
+        b.setIcon('arrow-up').setTooltip('Move up').onClick(() => swap(i, i - 1));
+        if (i === 0) b.setDisabled(true);
+      });
+
+      s.addExtraButton((b) => {
+        b.setIcon('arrow-down').setTooltip('Move down').onClick(() => swap(i, i + 1));
+        if (i === this.plugin.data.habits.length - 1) b.setDisabled(true);
+      });
       const used = habitEntryCount(this.plugin.data, habit.id);
       s.addExtraButton((b) => {
         b.setIcon('trash').setTooltip(
@@ -1857,14 +1862,6 @@ class HabitSettingTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl)
-      .setName('Zoom')
-      .addButton((b) =>
-        b.setButtonText('Reset zoom').onClick(async () => {
-          this.plugin.data.colW = 0;
-          await this.plugin.saveState();
-        })
-      );
 
     const d = this.plugin.data || {};
     const moodDays = Object.keys(d.moods || {}).length;
