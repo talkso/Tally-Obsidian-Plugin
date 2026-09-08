@@ -30,6 +30,7 @@ const DEFAULT_DATA = {
   logs: {},
   moods: {},
   period: 'week',
+  streakMode: 'best',
   colW: 0,
   columns: null,
 };
@@ -51,6 +52,7 @@ function serializeData(data) {
     logs: data.logs,
     moods: data.moods,
     period: data.period,
+    streakMode: data.streakMode,
     colW: data.colW,
     columns: data.columns,
   };
@@ -1025,8 +1027,39 @@ class TrackerView extends MarkdownRenderChild {
     ref.blocks.innerHTML = '';
     ref.blocks.appendChild(frag);
 
-    const best = this.bestStreak(log);
-    ref.tail.textContent = best ? String(best) : '';
+    const mode = this.data.streakMode || 'best';
+    let n;
+    let label;
+    if (mode === 'current') {
+      n = this.currentStreak(log);
+      label = 'Current streak';
+    } else if (mode === 'total') {
+      n = habitEntryCount(this.data, habit.id);
+      label = 'Total checks';
+    } else {
+      n = this.bestStreak(log);
+      label = 'Highest streak';
+    }
+    ref.tail.textContent = n ? String(n) : '';
+    ref.tail.setAttribute('aria-label', label + ': ' + n);
+  }
+
+  // counts back from today; leaving today unticked does not break it yet
+  currentStreak(log) {
+    const today = new Date();
+    let from = today;
+    if (!log[iso(today)]) {
+      const y = addDays(today, -1);
+      if (!log[iso(y)]) return 0;
+      from = y;
+    }
+    let n = 0;
+    let d = from;
+    while (log[iso(d)]) {
+      n++;
+      d = addDays(d, -1);
+    }
+    return n;
   }
 
   bestStreak(log) {
@@ -1495,6 +1528,7 @@ class HabitMoodPlugin extends Plugin {
     register('tracker', 'tracker');
     register('habits', 'tracker');
     register('log', 'log');
+    register('data', 'log');
 
     this.addSettingTab(new HabitSettingTab(this.app, this));
 
@@ -1581,6 +1615,7 @@ class HabitMoodPlugin extends Plugin {
     delete d.dataPath;
 
     if (d.period === 'day') d.period = 'week';
+    if (['best', 'current', 'total'].indexOf(d.streakMode) < 0) d.streakMode = 'best';
 
     for (const k of Object.keys(d.moods)) {
       const m = d.moods[k];
@@ -1732,6 +1767,14 @@ class HabitSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
+    new Setting(containerEl).setName('How to use').setHeading();
+
+    const how = containerEl.createDiv({ cls: 'hm-howto' });
+    how.createEl('p', { text: 'To begin using Tally, type into any obsidian note:' });
+    how.createEl('pre', { cls: 'hm-howto-code', text: '```tracker\n```' });
+    how.createEl('p', { text: 'to see your statistics, type into any obsidian note:' });
+    how.createEl('pre', { cls: 'hm-howto-code', text: '```data\n```' });
+
     new Setting(containerEl)
       .setName('Habits')
       .addButton((b) =>
@@ -1797,6 +1840,20 @@ class HabitSettingTab extends PluginSettingTab {
         });
       });
     });
+
+    new Setting(containerEl)
+      .setName('Streak number')
+      .addDropdown((dd) =>
+        dd
+          .addOption('best', 'Highest streak')
+          .addOption('current', 'Current streak')
+          .addOption('total', 'Total checks')
+          .setValue(this.plugin.data.streakMode || 'best')
+          .onChange(async (v) => {
+            this.plugin.data.streakMode = v;
+            await this.plugin.saveState();
+          })
+      );
 
     new Setting(containerEl)
       .setName('Zoom')

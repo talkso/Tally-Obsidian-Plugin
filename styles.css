@@ -712,3 +712,32 @@
     scroll-behavior: auto;
   }
 }
+
+/* settings: how to use */
+.hm-howto {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.hm-howto p {
+  margin: 0 0 4px;
+}
+
+.hm-howto-code {
+  margin: 0 0 14px;
+  padding: 8px 10px;
+  background: var(--background-primary);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-normal);
+  white-space: pre;
+}
+
+.hm-howto > :last-child {
+  margin-bottom: 0;
+}
