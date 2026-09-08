@@ -1142,8 +1142,11 @@ class TrackerView extends MarkdownRenderChild {
   faceEl(ds) {
     const m = this.data.moods[ds];
     const lvl = m && m.mood ? m.mood : 3;
+    // the expression follows the mood straight away, but the face only lights
+    // up once productivity and stress are answered too
+    const complete = !!(m && m.mood && m.productivity && m.stress);
     const span = document.createElement('span');
-    span.className = 'hm-face' + (m && m.mood ? ' has' : '');
+    span.className = 'hm-face' + (complete ? ' has' : '');
     span.innerHTML = faceSVG(lvl, Math.max(14, Math.min(24, this.colW - 18)));
     return span;
   }
@@ -1223,19 +1226,18 @@ class TrackerView extends MarkdownRenderChild {
     scale.appendChild(line);
 
     const cur = this.data.moods[ds] ? this.data.moods[ds][kind] : null;
-    const stops = [null, 1, 2, 3, 4, 5];
+    const stops = [1, 2, 3, 4, 5];
     stops.forEach((val) => {
       const stop = document.createElement('button');
-      const on = (val == null && !cur) || (val != null && cur === val);
-      stop.className = 'hm-stop' + (on ? ' is-on' : '');
-      stop.innerHTML =
-        '<span class="hm-dot"></span><span class="hm-stop-lab">' +
-        (val == null ? 'Not set' : val) +
-        '</span>';
+      stop.className = 'hm-stop' + (cur === val ? ' is-on' : '');
+      stop.innerHTML = '<span class="hm-dot"></span><span class="hm-stop-lab">' + val + '</span>';
       stop.addEventListener('click', () => {
-        setVal(kind, val);
-        scale.querySelectorAll('.hm-stop').forEach((s, idx) => {
-          s.classList.toggle('is-on', stops[idx] === val);
+        // clicking the current value again clears it, same as the faces
+        const now = this.data.moods[ds] ? this.data.moods[ds][kind] : null;
+        const next = now === val ? null : val;
+        setVal(kind, next);
+        scale.querySelectorAll('.hm-stop').forEach((el, idx) => {
+          el.classList.toggle('is-on', next != null && stops[idx] === next);
         });
       });
       scale.appendChild(stop);
