@@ -46,26 +46,47 @@ function cloneDefaults() {
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 
+// One record per line, keys sorted. A line-based sync merge can then only
+// duplicate or drop whole records - it cannot splice one section into another,
+// which is how the file gets corrupted when two devices write it at once.
+function sortedObject(obj) {
+  const out = {};
+  for (const k of Object.keys(obj || {}).sort()) out[k] = obj[k];
+  return out;
+}
+
+function jsonBlock(name, entries, open, close) {
+  const label = '  ' + JSON.stringify(name) + ': ';
+  if (!entries.length) return label + open + close + ',';
+  return label + open + '\n' + entries.join(',\n') + '\n  ' + close + ',';
+}
+
 function serializeData(data) {
-  const payload = {
-    habits: data.habits,
-    logs: data.logs,
-    moods: data.moods,
-    period: data.period,
-    streakMode: data.streakMode,
-    colW: data.colW,
-    columns: data.columns,
-  };
-  return [
-    '---',
-    'habit-tracker-data: true',
-    '---',
-    '',
-    '```json',
-    JSON.stringify(payload, null, 2),
-    '```',
-    '',
+  const j = (v) => JSON.stringify(v);
+
+  const habits = (data.habits || []).map((h) => '    ' + j(h));
+
+  const logs = Object.keys(data.logs || {})
+    .sort()
+    .map((id) => '    ' + j(id) + ': ' + j(sortedObject(data.logs[id])));
+
+  const moods = Object.keys(data.moods || {})
+    .sort()
+    .map((k) => '    ' + j(k) + ': ' + j(sortedObject(data.moods[k])));
+
+  const json = [
+    '{',
+    jsonBlock('habits', habits, '[', ']'),
+    jsonBlock('logs', logs, '{', '}'),
+    jsonBlock('moods', moods, '{', '}'),
+    '  "period": ' + j(data.period) + ',',
+    '  "streakMode": ' + j(data.streakMode) + ',',
+    '  "colW": ' + j(data.colW) + ',',
+    '  "columns": ' + j(data.columns || []),
+    '}',
   ].join('\n');
+
+  return ['---', 'habit-tracker-data: true', '---', '', '```json', json, '```', ''].join('\n');
 }
 
 function parseDataFile(text) {
@@ -1587,6 +1608,13 @@ class HabitMoodPlugin extends Plugin {
     this.lastRaw = raw;
     this.loaded = true;
 
+    // stash the last known-good copy so a bad sync merge is recoverable
+    if (fileExists && raw && this.legacy.backup !== raw) {
+      this.legacy.backup = raw;
+      this.legacy.backupAt = new Date().toISOString();
+      await this.saveData(Object.assign({}, this.legacy, { dataPath: this.settings.dataPath }));
+    }
+
     if (!fileExists && lifted) {
       await this.writeDataFile();
       new Notice('Habit tracker data moved to ' + path);
@@ -1747,6 +1775,37 @@ class HabitMoodPlugin extends Plugin {
     for (const v of this.views) v.safeRender();
   }
 
+  hasBackup() {
+    return !!(this.legacy && this.legacy.backup);
+  }
+
+  async restoreBackup() {
+    const raw = this.legacy && this.legacy.backup;
+    if (!raw) {
+      new Notice('No backup available.');
+      return false;
+    }
+    if (!parseDataFile(raw)) {
+      new Notice('The backup is unreadable, so nothing was changed.');
+      return false;
+    }
+
+    const path = this.settings.dataPath;
+    try {
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (file instanceof TFile) await this.app.vault.modify(file, raw);
+      else await this.app.vault.adapter.write(path, raw);
+      this.lastRaw = null;
+      await this.loadState();
+      new Notice('Restored the backup from ' + (this.legacy.backupAt || 'earlier') + '.');
+      return true;
+    } catch (err) {
+      console.error('[habit-mood-tracker] restore failed', err);
+      new Notice('Could not write to ' + path + '.');
+      return false;
+    }
+  }
+
   async setDataPath(path) {
     this.settings.dataPath = path;
     this.lastRaw = null;
@@ -1899,7 +1958,14 @@ class HabitSettingTab extends PluginSettingTab {
           await this.plugin.loadState();
           this.display();
         })
-      );
+      )
+      .addButton((b) => {
+        b.setButtonText('Restore backup').onClick(async () => {
+          await this.plugin.restoreBackup();
+          this.display();
+        });
+        if (!this.plugin.hasBackup()) b.setDisabled(true);
+      });
 
   }
 }
